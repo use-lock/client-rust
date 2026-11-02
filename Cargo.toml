@@ -1,0 +1,44 @@
+[package]
+name = "lock-client"
+version = "0.0.0"
+edition = "2024"
+rust-version = "1.88"
+description = "Rust client for the Lock identity provider: OIDC login with PKCE, token validation and generated API clients."
+license = "MIT"
+repository = "https://github.com/use-lock/client-rust"
+homepage = "https://github.com/use-lock/client-rust"
+readme = "README.md"
+keywords = ["lock", "oidc", "oauth2", "authentication", "identity"]
+categories = ["authentication", "api-bindings"]
+exclude = ["/.github", "/openapi/templates", "/tests", "/Makefile", "/bin", "/.cache"]
+
+[features]
+default = []
+# Generated API clients (see openapi/ and `make generate`).
+admin = []
+management = []
+auth-api = []
+# In-process token signer for tests of applications that use this crate.
+testing = []
+
+[dependencies]
+async-trait = "0.1"
+aws-lc-rs = "1"
+base64 = "0.23"
+reqwest = { version = "0.13", default-features = false, features = ["rustls", "json", "form", "http2"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+thiserror = "2"
+url = "2"
+
+[dev-dependencies]
+axum = "0.8"
+lock-client = { path = ".", features = ["testing"] }
+tokio = { version = "1", features = ["macros", "rt-multi-thread", "net", "time"] }
+
+[lints.rust]
+unsafe_code = "forbid"
+
+[lints.clippy]
+unwrap_used = "deny"
+expect_used = "deny"
