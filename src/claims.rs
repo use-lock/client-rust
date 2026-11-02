@@ -18,6 +18,34 @@ fn audience<'de, D: Deserializer<'de>>(deserializer: D) -> Result<Vec<String>, D
     })
 }
 
+/// Lock formats `iat`, `exp` and `nbf` with microsecond precision (a float such as
+/// `1762085339.123456`) unless the microseconds happen to be zero, so a timestamp is an integer or
+/// a float. Floats truncate to whole seconds, as the validators already read them.
+#[derive(Deserialize)]
+#[serde(untagged)]
+enum Timestamp {
+    Whole(i64),
+    Fractional(f64),
+}
+
+impl Timestamp {
+    fn seconds(self) -> i64 {
+        match self {
+            Timestamp::Whole(whole) => whole,
+            // `as i64` saturates, which is the intended clamp for absurd values.
+            Timestamp::Fractional(fractional) => fractional as i64,
+        }
+    }
+}
+
+fn timestamp<'de, D: Deserializer<'de>>(deserializer: D) -> Result<i64, D::Error> {
+    Ok(Timestamp::deserialize(deserializer)?.seconds())
+}
+
+fn optional_timestamp<'de, D: Deserializer<'de>>(deserializer: D) -> Result<Option<i64>, D::Error> {
+    Ok(Option::<Timestamp>::deserialize(deserializer)?.map(Timestamp::seconds))
+}
+
 /// The validated claims of an ID token.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct IdTokenClaims {
@@ -29,8 +57,10 @@ pub struct IdTokenClaims {
     #[serde(deserialize_with = "audience", default)]
     pub aud: Vec<String>,
     /// Expiry, seconds since the Unix epoch.
+    #[serde(deserialize_with = "timestamp")]
     pub exp: i64,
     /// Issue time, seconds since the Unix epoch.
+    #[serde(deserialize_with = "timestamp")]
     pub iat: i64,
     /// The nonce of the authorization request.
     #[serde(default)]
@@ -42,7 +72,7 @@ pub struct IdTokenClaims {
     #[serde(default)]
     pub sid: Option<String>,
     /// When the user authenticated.
-    #[serde(default)]
+    #[serde(default, deserialize_with = "optional_timestamp")]
     pub auth_time: Option<i64>,
     /// The display name (`profile` scope).
     #[serde(default)]
@@ -78,12 +108,13 @@ pub struct AccessTokenClaims {
     #[serde(deserialize_with = "audience", default)]
     pub aud: Vec<String>,
     /// Expiry, seconds since the Unix epoch.
+    #[serde(deserialize_with = "timestamp")]
     pub exp: i64,
     /// Issue time.
-    #[serde(default)]
+    #[serde(default, deserialize_with = "optional_timestamp")]
     pub iat: Option<i64>,
     /// Not before.
-    #[serde(default)]
+    #[serde(default, deserialize_with = "optional_timestamp")]
     pub nbf: Option<i64>,
     /// The token id.
     #[serde(default)]
@@ -123,6 +154,7 @@ pub struct LogoutToken {
     /// The token id, used for replay protection.
     pub jti: Option<String>,
     /// Expiry, seconds since the Unix epoch.
+    #[serde(deserialize_with = "timestamp")]
     pub exp: i64,
 }
 
@@ -172,10 +204,10 @@ pub struct Introspection {
     #[serde(default)]
     pub sub: Option<String>,
     /// Expiry.
-    #[serde(default)]
+    #[serde(default, deserialize_with = "optional_timestamp")]
     pub exp: Option<i64>,
     /// Issue time.
-    #[serde(default)]
+    #[serde(default, deserialize_with = "optional_timestamp")]
     pub iat: Option<i64>,
     /// The token id.
     #[serde(default)]
