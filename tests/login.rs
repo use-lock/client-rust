@@ -606,3 +606,23 @@ fn logout_url_and_configuration() {
         Err(Error::Config(_))
     ));
 }
+
+/// Lock builds its tokens with lcobucci/jwt's default claims formatter, which writes `iat` and
+/// `exp` as floats with microseconds (`1762085339.123456`) unless the microseconds are zero.
+#[tokio::test]
+async fn id_token_with_fractional_timestamps_is_accepted() {
+    let fake = Fake::start().await;
+    let realm = realm(&fake, false);
+    let mut claims = fake.provider().id_token_claims(CLIENT_ID, "n", "user-1");
+    let now = claims["iat"].as_i64().unwrap() as f64;
+    claims["iat"] = json!(now + 0.123456);
+    claims["exp"] = json!(now + 3600.654321);
+    claims["auth_time"] = json!(now - 5.5);
+    let token = fake.provider().sign(None, &claims);
+
+    let validated = realm.id_tokens().validate(&token, "n").await.unwrap();
+    assert_eq!(validated.sub, "user-1");
+    assert_eq!(validated.iat, now as i64);
+    assert_eq!(validated.exp, now as i64 + 3600);
+    assert_eq!(validated.auth_time, Some(now as i64 - 6));
+}
