@@ -41,6 +41,16 @@ mod validate;
 #[cfg(feature = "testing")]
 pub mod testing;
 
+/// The generated Admin API client: realms.
+#[cfg(feature = "admin")]
+pub mod admin;
+/// The generated Auth API client: OAuth, OpenID Connect, userinfo and discovery endpoints.
+#[cfg(feature = "auth-api")]
+pub mod auth_api;
+/// The generated Management API client: clients, resources and social providers of a realm.
+#[cfg(feature = "management")]
+pub mod management;
+
 pub use authorization::{Authorization, AuthorizationRequest, AuthorizeOptions, CallbackParams};
 pub use cache::{Cache, MemoryCache};
 pub use claims::{AccessTokenClaims, IdTokenClaims, Introspection, LogoutToken, UserInfo};

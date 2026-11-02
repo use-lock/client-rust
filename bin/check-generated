@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+# Fails when the committed generated code differs from what the specs generate.
+set -euo pipefail
+cd "$(dirname "$0")/.."
+baseline=$(mktemp -d)
+trap 'rm -rf "$baseline"' EXIT
+mkdir "$baseline/src"
+cp -R src/admin src/auth_api src/management "$baseline/src/"
+bash bin/generate
+for module in admin auth_api management; do
+    diff -ru "$baseline/src/$module" "src/$module"
+done

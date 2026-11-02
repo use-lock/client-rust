@@ -1,0 +1,156 @@
+{
+    "v1.realms.index": [
+        "Realms",
+        "listRealms"
+    ],
+    "v1.realms.store": [
+        "Realms",
+        "createRealm"
+    ],
+    "v1.realms.show": [
+        "Realms",
+        "getRealm"
+    ],
+    "v1.realms.update": [
+        "Realms",
+        "updateRealm"
+    ],
+    "v1.realms.destroy": [
+        "Realms",
+        "deleteRealm"
+    ],
+    "v1.realms.social-providers.index": [
+        "SocialProviders",
+        "listSocialProviders"
+    ],
+    "v1.realms.social-providers.store": [
+        "SocialProviders",
+        "createSocialProvider"
+    ],
+    "v1.realms.social-providers.show": [
+        "SocialProviders",
+        "getSocialProvider"
+    ],
+    "v1.realms.social-providers.update": [
+        "SocialProviders",
+        "updateSocialProvider"
+    ],
+    "v1.realms.social-providers.destroy": [
+        "SocialProviders",
+        "deleteSocialProvider"
+    ],
+    "v1.realms.clients.index": [
+        "Clients",
+        "listClients"
+    ],
+    "v1.realms.clients.store": [
+        "Clients",
+        "createClient"
+    ],
+    "v1.realms.clients.show": [
+        "Clients",
+        "getClient"
+    ],
+    "v1.realms.clients.update": [
+        "Clients",
+        "updateClient"
+    ],
+    "v1.realms.clients.destroy": [
+        "Clients",
+        "deleteClient"
+    ],
+    "v1.realms.clients.secret": [
+        "Clients",
+        "getClientSecret"
+    ],
+    "v1.realms.clients.rotate-secret": [
+        "Clients",
+        "rotateClientSecret"
+    ],
+    "v1.realms.resources.index": [
+        "Resources",
+        "listResources"
+    ],
+    "v1.realms.resources.store": [
+        "Resources",
+        "createResource"
+    ],
+    "v1.realms.resources.show": [
+        "Resources",
+        "getResource"
+    ],
+    "v1.realms.resources.update": [
+        "Resources",
+        "updateResource"
+    ],
+    "v1.realms.resources.destroy": [
+        "Resources",
+        "deleteResource"
+    ],
+    "oidc.token.post": [
+        "Tokens",
+        "issueToken"
+    ],
+    "oidc.introspect.post": [
+        "Tokens",
+        "introspectToken"
+    ],
+    "oidc.revoke.post": [
+        "Tokens",
+        "revokeToken"
+    ],
+    "oidc.register.post": [
+        "Registration",
+        "registerClient"
+    ],
+    "oidc.authorize.get": [
+        "Authorization",
+        "authorize"
+    ],
+    "oidc.authorize.post": [
+        "Authorization",
+        "submitAuthorization"
+    ],
+    "oidc.logout.get": [
+        "Logout",
+        "logout"
+    ],
+    "oidc.logout.post": [
+        "Logout",
+        "submitLogout"
+    ],
+    "oidc.approve.post": null,
+    "oidc.deny.delete": null,
+    "oidc.userinfo.get": [
+        "UserInfo",
+        "getUserInfo"
+    ],
+    "oidc.userinfo.post": [
+        "UserInfo",
+        "postUserInfo"
+    ],
+    "oidc.discovery.get": [
+        "Discovery",
+        "getProviderMetadata"
+    ],
+    "oidc.authorization-server.get.8ca0eddb": [
+        "Discovery",
+        "getAuthorizationServerMetadata"
+    ],
+    "oidc.authorization-server.get.09f364ce": [
+        "Discovery",
+        "getAuthorizationServerMetadataForPath"
+    ],
+    "oidc.jwks.get": [
+        "Discovery",
+        "getJsonWebKeySet"
+    ],
+    "oidc.protected-resource.get.0e6f2ef1": [
+        "Discovery",
+        "getProtectedResourceMetadata"
+    ],
+    "oidc.protected-resource.get.fa79234b": [
+        "Discovery",
+        "getProtectedResourceMetadataForPath"
+    ]
+}

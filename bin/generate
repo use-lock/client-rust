@@ -1,0 +1,44 @@
+#!/usr/bin/env bash
+# Regenerates src/admin, src/management and src/auth_api from openapi/spec with OpenAPI Generator.
+set -euo pipefail
+cd "$(dirname "$0")/.."
+version=7.25.0
+jar=".cache/openapi-generator-cli-$version.jar"
+mkdir -p .cache
+if [ ! -f "$jar" ]; then
+    curl --fail --location --silent --show-error "https://repo.maven.apache.org/maven2/org/openapitools/openapi-generator-cli/$version/openapi-generator-cli-$version.jar" -o "$jar.tmp"
+    mv "$jar.tmp" "$jar"
+fi
+actual=$(shasum -a 256 "$jar" | cut -d' ' -f1)
+if [ "$actual" != "41ce4f6b07f196676439d710759fa1ced7a08066d06ff1bf314681470289efae" ]; then
+    echo "Generator checksum mismatch" >&2
+    exit 1
+fi
+generation_dir=$(mktemp -d .cache/generate.XXXXXX)
+trap 'rm -rf "$generation_dir"' EXIT
+python3 bin/prepare-openapi.py "$generation_dir"
+for entry in Admin:admin Auth:auth_api Management:management; do
+    group=${entry%%:*}
+    module=${entry##*:}
+    output="$generation_dir/generated-$group"
+    java -jar "$jar" generate -g rust -i "$generation_dir/$group.json" -o "$output" \
+        --additional-properties="packageName=lock_$module,library=reqwest,supportAsync=true,useSingleRequestParameter=true,hideGenerationTimestamp=true,avoidBoxedModels=true" \
+        --global-property "apis,models,supportingFiles=,apiTests=false,modelTests=false,apiDocs=false,modelDocs=false" \
+        > "$generation_dir/$group.log" 2>&1 || { cat "$generation_dir/$group.log"; exit 1; }
+    rm -rf "src/$module"
+    mkdir -p "src/$module"
+    cp -R "$output/src/apis" "$output/src/models" "src/$module/"
+    # The generated crate becomes a module of this one. The generator also doubles the models
+    # path of oneOf parameters.
+    cat > "src/$module/mod.rs" <<MOD
+//! Generated from Lock's OpenAPI specification. Do not edit by hand; run \`make generate\`.
+#![allow(unused_imports, clippy::all, missing_docs)]
+#![allow(clippy::too_many_arguments)]
+
+pub mod apis;
+pub mod models;
+MOD
+    find "src/$module" -name '*.rs' -exec perl -pi -e "s/\bcrate::/crate::$module::/g; s/::serde_with::/serde_with::/g; s/\bmodels::models::/models::/g; s/filter_left_square_bracket_(\w+?)_right_square_bracket/filter_\$1/g" {} +
+done
+cargo fmt
+printf 'Generated the Admin, Auth and Management clients with OpenAPI Generator %s.\n' "$version"

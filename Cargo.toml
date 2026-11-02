@@ -15,9 +15,10 @@ exclude = ["/.github", "/openapi/templates", "/tests", "/Makefile", "/bin", "/.c
 [features]
 default = []
 # Generated API clients (see openapi/ and `make generate`).
-admin = []
-management = []
-auth-api = []
+admin = ["generated"]
+management = ["generated"]
+auth-api = ["generated"]
+generated = ["dep:serde_with", "dep:serde_repr", "reqwest/query"]
 # In-process token signer for tests of applications that use this crate.
 testing = []
 
@@ -28,6 +29,8 @@ base64 = "0.23"
 reqwest = { version = "0.13", default-features = false, features = ["rustls", "json", "form", "http2"] }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
+serde_repr = { version = "0.1", optional = true }
+serde_with = { version = "3", default-features = false, features = ["std", "macros"], optional = true }
 thiserror = "2"
 url = "2"
 

@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+# Downloads Lock's OpenAPI specs from GitHub and regenerates the clients.
+# LOCK_REPOSITORY and LOCK_REF select another repository, branch, tag or commit.
+set -euo pipefail
+cd "$(dirname "$0")/.."
+repository=${LOCK_REPOSITORY:-use-lock/lock}
+ref=${LOCK_REF:-main}
+mkdir -p openapi/spec
+for group in admin auth management; do
+    curl --fail --location --silent --show-error "https://raw.githubusercontent.com/$repository/$ref/openapi.$group.json" -o "openapi/spec/$group.json.tmp"
+    mv "openapi/spec/$group.json.tmp" "openapi/spec/$group.json"
+done
+bash bin/generate

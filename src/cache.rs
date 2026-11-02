@@ -91,3 +91,24 @@ impl Cache for MemoryCache {
         true
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[tokio::test]
+    async fn entries_expire_and_add_does_not_overwrite() {
+        let cache = MemoryCache::new();
+        cache.set("a", "1".into(), Duration::from_millis(30)).await;
+        assert_eq!(cache.get("a").await.as_deref(), Some("1"));
+        assert!(!cache.add("a", "2".into(), Duration::from_secs(60)).await);
+
+        tokio::time::sleep(Duration::from_millis(60)).await;
+        assert_eq!(cache.get("a").await, None);
+        assert!(cache.add("a", "3".into(), Duration::from_secs(60)).await);
+        assert_eq!(cache.get("a").await.as_deref(), Some("3"));
+
+        cache.delete("a").await;
+        assert_eq!(cache.get("a").await, None);
+    }
+}
